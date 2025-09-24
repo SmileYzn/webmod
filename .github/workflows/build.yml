@@ -1,0 +1,110 @@
+#
+# https://github.com/actions/checkout/issues/1590#issuecomment-2567109195
+#
+# We manually start a container and execute scripts in it instead of using `jobs.build.container`,
+# otherwise we couldn't use GitHub-provided actions (checkout, cache, etc.) as they rely on Node20
+# which would not necessarily be available on some containers (e.g., Ubuntu 18.04).
+#
+# See: https://github.com/actions/checkout/issues/1590
+#
+# If you need to pass environment variables from the GitHub host runner to the Docker container,
+# you can do so by adding `-e MY_VAR` to the docker run command, for example:
+#
+#    docker run --name build-container -d -e GITHUB_REPOSITORY -v ...
+#
+name: Action Build System
+on: [push]
+env:
+  CONTAINER: ubuntu:18.04
+
+jobs:
+  linux:
+    name: Linux Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Start Docker Container
+      run: |
+        docker pull $CONTAINER
+        docker run --name build-container -d -v ${{github.workspace}}:/desktop $CONTAINER tail -f /dev/null
+
+    - name: Install Development Tools Packages
+      env:
+        SCRIPT: |
+          # Add i386 architecture
+          dpkg --add-architecture i386
+
+          # Update repository
+          apt-get update > /dev/null
+
+          # Install build dependencies
+          apt-get install -qq -y wget unzip build-essential gcc-4.8-multilib g++-4.8-multilib libgcc1:i386 libcurl4-openssl-dev:i386 zlib1g-dev:i386 libssl-dev:i386 > /dev/null
+
+          # Update alternatives
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
+      run: docker exec build-container bash -c "$SCRIPT"
+
+    - name: Execute Build
+      env:
+        SCRIPT: |
+          # Open makefile directory
+          cd /desktop/stub
+
+          # Make Release Directory
+          mkdir -p Release
+
+          # Make linux (Without post build script)
+          make
+
+          # Make dlls path
+          mkdir -p ../cstrike/addons/stub/dlls
+
+          # Copy release file
+          cp ./Release/stub_mm.so ../cstrike/addons/stub/dlls
+
+      run: docker exec build-container bash -c "$SCRIPT"
+
+    - name: Deploy artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux32
+        path: ${{github.workspace}}/cstrike
+        
+  windows:
+    name: Windows Build
+    runs-on: windows-latest
+  
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Execute Build
+      working-directory: ${{github.workspace}}
+      run: |
+        # Open directory
+        cd stub
+
+        # Make Release directory
+        mkdir -p Release
+
+        # Execute Build
+        msbuild Stub.vcxproj -property:configuration=Release -nologo -verbosity:quiet -m
+
+        # Make publish directory
+        mkdir -p ..\cstrike\addons\stub\dlls
+
+        # Copy cstrike files to publish
+        copy ..\cstrike\* publish -Recurse -Force
+
+        # Move released dll to publish
+        copy Release\*.dll ..\cstrike\addons\stub\dlls -Recurse -Force
+
+    - name: Deploy artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: win32
+        path: ${{github.workspace}}/cstrike

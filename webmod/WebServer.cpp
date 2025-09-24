@@ -15,6 +15,11 @@ void CWebServer::ServerActivate()
             if (!this->m_Running)
             {
                 this->m_Running = tw_server_init(&this->m_Server, 27020);
+
+                if (this->m_Running)
+                {
+                    tw__set_nonblocking(1);
+                }
             }
         }
     }

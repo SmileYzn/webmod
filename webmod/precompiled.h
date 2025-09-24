@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #ifndef _WIN32
 #define _GLIBCXX_USE_CXX11_ABI 0
 #define _stricmp strcasecmp
@@ -11,6 +15,12 @@
 #define _close close
 #define _acces access
 #define _vsnwprintf vswprintf
+#else
+#pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"wldap32.lib")
+#pragma comment(lib,"advapi32.lib")
+#pragma comment(lib,"crypt32.lib")
+#pragma comment(lib,"normaliz.lib")
 #endif
 
 #ifdef _WIN32
@@ -40,6 +50,9 @@
 // ReGameDLL Api
 #include <regamedll_api.h>
 
+// Twinwire Header
+#include "include/thinwire.h"
+
 // Metamod Includes
 #include "MetaMod.h"
 
@@ -49,3 +62,4 @@
 
 // Web Mod
 #include "WebMod.h"
+#include "WebServer.h"

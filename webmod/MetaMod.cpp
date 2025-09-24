@@ -98,11 +98,36 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS *pFunctionTable, int *interface
 {
 	memset(&g_DLL_FunctionTable_Post, 0, sizeof(DLL_FUNCTIONS));
 
-	// Funtion hooks here
+	g_DLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
+
+	g_DLL_FunctionTable_Post.pfnServerDeactivate = DLL_POST_ServerDeactivate;
+
+	g_DLL_FunctionTable_Post.pfnStartFrame = DLL_POST_StartFrame;
 
 	memcpy(pFunctionTable, &g_DLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));
 
 	return 1;
+}
+
+void DLL_POST_ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
+{
+	gWebServer.ServerActivate();
+
+	RETURN_META(MRES_IGNORED);
+}
+
+void DLL_POST_ServerDeactivate()
+{
+	gWebServer.ServerDeactivate();
+
+	RETURN_META(MRES_IGNORED);
+}
+
+void DLL_POST_StartFrame()
+{
+	gWebServer.StartFrame();
+
+	RETURN_META(MRES_IGNORED);
 }
 #pragma endregion
 

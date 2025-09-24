@@ -10,7 +10,7 @@ POS_CMD=sh PostBuild.sh
 CLEAN_CMD=rm -rf $(BUILD_DIR)
 #
 # Common build definitions
-BUILD_NAME=stub_mm
+BUILD_NAME=webmod_mm
 BUILD_SOURCES=$(wildcard *.cpp)
 BUILD_CFLAGS=-std=c++11 -Wall -Wno-unknown-pragmas -fcommon -m32 -mtune=generic -msse3 -msse4.1 -msse4.2 -shared -s -pipe -g0 -O0 -fPIC -funroll-loops -fomit-frame-pointer -fno-stack-protector -fvisibility=hidden -DNDEBUG
 BUILD_TARGET=linux32

@@ -1,4 +1,4 @@
-LIBRARY stub_mm
+LIBRARY webmod_mm
 EXPORTS
 	GiveFnptrsToDll @1
 SECTIONS

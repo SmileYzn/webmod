@@ -4,12 +4,12 @@
 plugin_info_t Plugin_info =
 {
 	META_INTERFACE_VERSION,
-	"Stub Plugin",
+	"Web Mod",
 	"0.0.1",
 	__DATE__,
 	"SmileY",
-	"https://github.com/SmileYzn/stub",
-	"STUB",
+	"https://github.com/SmileYzn/webmod",
+	"WEB",
 	PT_STARTUP,
 	PT_ANYTIME,
 };
